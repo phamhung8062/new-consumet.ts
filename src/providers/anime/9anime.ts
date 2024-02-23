@@ -50,12 +50,22 @@ class NineAnime extends AnimeParser {
     };
 
     try {
-      const vrf = await this.searchVrf(query);
+      // const vrf = await this.searchVrf(query);
+      // const res = await this.client.get(
+      //   `${this.baseUrl}/filter?keyword=${encodeURIComponent(query).replace(
+      //     /%20/g,
+      //     '+'
+      //   )}&vrf=${encodeURIComponent(vrf)}&page=${page}`
+      // );
+      console.log('ANIME_URL', `${this.baseUrl}/filter?keyword=${encodeURIComponent(query).replace(
+        /%20/g,
+        '+'
+      )}&page=${page}`);
       const res = await this.client.get(
         `${this.baseUrl}/filter?keyword=${encodeURIComponent(query).replace(
           /%20/g,
           '+'
-        )}&vrf=${encodeURIComponent(vrf)}&page=${page}`
+        )}&page=${page}`
       );
 
       const $ = load(res.data);

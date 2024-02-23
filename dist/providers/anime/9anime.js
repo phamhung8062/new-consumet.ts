@@ -27,8 +27,15 @@ class NineAnime extends models_1.AnimeParser {
             results: [],
         };
         try {
-            const vrf = await this.searchVrf(query);
-            const res = await this.client.get(`${this.baseUrl}/filter?keyword=${encodeURIComponent(query).replace(/%20/g, '+')}&vrf=${encodeURIComponent(vrf)}&page=${page}`);
+            // const vrf = await this.searchVrf(query);
+            // const res = await this.client.get(
+            //   `${this.baseUrl}/filter?keyword=${encodeURIComponent(query).replace(
+            //     /%20/g,
+            //     '+'
+            //   )}&vrf=${encodeURIComponent(vrf)}&page=${page}`
+            // );
+            console.log('ANIME_URL', `${this.baseUrl}/filter?keyword=${encodeURIComponent(query).replace(/%20/g, '+')}&page=${page}`);
+            const res = await this.client.get(`${this.baseUrl}/filter?keyword=${encodeURIComponent(query).replace(/%20/g, '+')}&page=${page}`);
             const $ = (0, cheerio_1.load)(res.data);
             searchResult.hasNextPage =
                 $(`ul.pagination`).length > 0
