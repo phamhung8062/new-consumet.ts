@@ -213,10 +213,13 @@ class NineAnime extends AnimeParser {
 
       const id = $('#watch-main').attr('data-id')!;
 
-      const vrf = await this.ev(id);
+      // const vrf = await this.ev(id);
+      // const {
+      //   data: { result },
+      // } = await this.client.get(`${this.baseUrl}/ajax/episode/list/${id}?vrf=${encodeURIComponent(vrf)}`);
       const {
         data: { result },
-      } = await this.client.get(`${this.baseUrl}/ajax/episode/list/${id}?vrf=${encodeURIComponent(vrf)}`);
+      } = await this.client.get(`${this.baseUrl}/ajax/episode/list/${id}`);
       const $$ = load(result);
       animeInfo.totalEpisodes = $$('div.episodes > ul > li > a').length;
       animeInfo.episodes = [];

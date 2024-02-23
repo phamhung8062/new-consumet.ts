@@ -159,8 +159,11 @@ class NineAnime extends models_1.AnimeParser {
             animeInfo.hasSub = $('div#w-info > .binfo > .info > .meta .sub').length == 1;
             animeInfo.hasDub = $('div#w-info > .binfo > .info > .meta .dub').length == 1;
             const id = $('#watch-main').attr('data-id');
-            const vrf = await this.ev(id);
-            const { data: { result }, } = await this.client.get(`${this.baseUrl}/ajax/episode/list/${id}?vrf=${encodeURIComponent(vrf)}`);
+            // const vrf = await this.ev(id);
+            // const {
+            //   data: { result },
+            // } = await this.client.get(`${this.baseUrl}/ajax/episode/list/${id}?vrf=${encodeURIComponent(vrf)}`);
+            const { data: { result }, } = await this.client.get(`${this.baseUrl}/ajax/episode/list/${id}`);
             const $$ = (0, cheerio_1.load)(result);
             animeInfo.totalEpisodes = $$('div.episodes > ul > li > a').length;
             animeInfo.episodes = [];
