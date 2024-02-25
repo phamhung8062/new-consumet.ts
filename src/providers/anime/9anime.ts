@@ -351,16 +351,17 @@ class NineAnime extends AnimeParser {
   }
 
   override async fetchEpisodeServers(episodeId: string): Promise<IEpisodeServer[]> {
-    if (!episodeId.startsWith(this.baseUrl))
+    try {
+      if (!episodeId.startsWith(this.baseUrl))
       episodeId = `${this.baseUrl}/ajax/server/list/${episodeId}?vrf=${encodeURIComponent(
         await vrfEncrypt(episodeId)
         // await this.ev(episodeId)
       )}`;
-
+      console.log('episodeId', episodeId)
     const {
       data: { result },
     } = await this.client.get(episodeId);
-
+console.log('episodeId-data', result)
     const $ = load(result);
 
     const servers: IEpisodeServer[] = [];
@@ -371,8 +372,10 @@ class NineAnime extends AnimeParser {
         url: `${serverId}`,
       });
     });
-
     return servers;
+    }catch (err) {
+      throw new Error((err as Error).message);
+    }
   }
 
   // public async ev(query: string, raw = false): Promise<string> {

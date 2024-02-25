@@ -293,21 +293,28 @@ class NineAnime extends models_1.AnimeParser {
         }
     }
     async fetchEpisodeServers(episodeId) {
-        if (!episodeId.startsWith(this.baseUrl))
-            episodeId = `${this.baseUrl}/ajax/server/list/${episodeId}?vrf=${encodeURIComponent(await (0, utils_2.vrfEncrypt)(episodeId)
-            // await this.ev(episodeId)
-            )}`;
-        const { data: { result }, } = await this.client.get(episodeId);
-        const $ = (0, cheerio_1.load)(result);
-        const servers = [];
-        $('.type > ul > li').each((i, el) => {
-            const serverId = $(el).attr('data-link-id');
-            servers.push({
-                name: $(el).text().toLocaleLowerCase(),
-                url: `${serverId}`,
+        try {
+            if (!episodeId.startsWith(this.baseUrl))
+                episodeId = `${this.baseUrl}/ajax/server/list/${episodeId}?vrf=${encodeURIComponent(await (0, utils_2.vrfEncrypt)(episodeId)
+                // await this.ev(episodeId)
+                )}`;
+            console.log('episodeId', episodeId);
+            const { data: { result }, } = await this.client.get(episodeId);
+            console.log('episodeId-data', result);
+            const $ = (0, cheerio_1.load)(result);
+            const servers = [];
+            $('.type > ul > li').each((i, el) => {
+                const serverId = $(el).attr('data-link-id');
+                servers.push({
+                    name: $(el).text().toLocaleLowerCase(),
+                    url: `${serverId}`,
+                });
             });
-        });
-        return servers;
+            return servers;
+        }
+        catch (err) {
+            throw new Error(err.message);
+        }
     }
     // public async ev(query: string, raw = false): Promise<string> {
     //   const { data } = await this.client.get(
