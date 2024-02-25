@@ -170,6 +170,7 @@ export enum StreamingServers {
   Mp4Upload = 'mp4upload',
   UpCloud = 'upcloud',
   VidCloud = 'vidcloud',
+  VidPlay = 'vidplay',
   StreamTape = 'streamtape',
   VizCloud = 'vizcloud',
   // same as vizcloud
@@ -332,6 +333,7 @@ export interface ISource {
   sources: IVideo[];
   download?: string;
   embedURL?: string;
+  
 }
 
 /**

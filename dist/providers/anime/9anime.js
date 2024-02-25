@@ -4,6 +4,7 @@ const cheerio_1 = require("cheerio");
 const models_1 = require("../../models");
 const extractors_1 = require("../../extractors");
 const utils_1 = require("../../utils");
+const utils_2 = require("../../utils/utils");
 /**
  * **Use at your own risk :)** 9anime devs keep changing the keys every week
  */
@@ -159,11 +160,11 @@ class NineAnime extends models_1.AnimeParser {
             animeInfo.hasSub = $('div#w-info > .binfo > .info > .meta .sub').length == 1;
             animeInfo.hasDub = $('div#w-info > .binfo > .info > .meta .dub').length == 1;
             const id = $('#watch-main').attr('data-id');
+            const vrf = await (0, utils_2.vrfEncrypt)(id);
             // const vrf = await this.ev(id);
-            // const {
-            //   data: { result },
-            // } = await this.client.get(`${this.baseUrl}/ajax/episode/list/${id}?vrf=${encodeURIComponent(vrf)}`);
-            const { data: { result }, } = await this.client.get(`${this.baseUrl}/ajax/episode/list/${id}`);
+            // console.log('firsvrft', vrf)
+            const { data: { result }, } = await this.client.get(`${this.baseUrl}/ajax/episode/list/${id}?vrf=${encodeURIComponent(vrf)}`);
+            // console.log('episode/list', `${this.baseUrl}/ajax/episode/list/${id}?vrf=${encodeURIComponent(vrf)}`)
             const $$ = (0, cheerio_1.load)(result);
             animeInfo.totalEpisodes = $$('div.episodes > ul > li > a').length;
             animeInfo.episodes = [];
@@ -194,9 +195,8 @@ class NineAnime extends models_1.AnimeParser {
             throw new Error(err.message);
         }
     }
-    async fetchEpisodeSources(episodeId, server = models_1.StreamingServers.VizCloud) {
-        var _a, _b, _c, _d, _e, _f;
-        if (episodeId.startsWith('http')) {
+    async fetchEpisodeSources(episodeId, server = models_1.StreamingServers.VidPlay) {
+        if (episodeId.startsWith('https')) {
             const serverUrl = new URL(episodeId);
             switch (server) {
                 case models_1.StreamingServers.StreamTape:
@@ -206,6 +206,7 @@ class NineAnime extends models_1.AnimeParser {
                     };
                 case models_1.StreamingServers.VizCloud:
                 case models_1.StreamingServers.VidCloud:
+                case models_1.StreamingServers.VidPlay:
                     return {
                         headers: { Referer: serverUrl.href, 'User-Agent': utils_1.USER_AGENT },
                         sources: await new extractors_1.VizCloud().extract(serverUrl, this.nineAnimeResolver, this.apiKey),
@@ -226,10 +227,13 @@ class NineAnime extends models_1.AnimeParser {
         }
         try {
             const servers = await this.fetchEpisodeServers(episodeId);
+            // console.log('servers', servers)
             let s = servers.find(s => s.name === server);
+            // console.log('server', server)
+            // console.log('first', s)
             switch (server) {
-                case models_1.StreamingServers.VizCloud:
-                    s = servers.find(s => s.name === 'vidstream');
+                case models_1.StreamingServers.VidPlay:
+                    s = servers.find(s => s.name === 'vidplay');
                     if (!s)
                         throw new Error('Vidstream server found');
                     break;
@@ -248,24 +252,41 @@ class NineAnime extends models_1.AnimeParser {
                     if (!s)
                         throw new Error('Filemoon server found');
                     break;
+                case models_1.StreamingServers.Filemoon:
+                    s = servers.find(s => s.name === 'filemoon');
+                    if (!s)
+                        throw new Error('Filemoon server found');
+                    break;
                 default:
-                    throw new Error('Server not found');
+                    throw new Error('Server not found1');
             }
-            const serverVrf = (await this.client.get(`${this.nineAnimeResolver}/vrf?query=${encodeURIComponent(s.url)}&apikey=${this.apiKey}`)).data.url;
+            // const serverVrf = await this.ev(s.url);
+            const serverVrf = await (0, utils_2.vrfEncrypt)(s.url);
+            // console.log('serverVrf', serverVrf)
             const serverSource = (await this.client.get(`${this.baseUrl}/ajax/server/${s.url}?vrf=${encodeURIComponent(serverVrf)}`)).data;
-            const embedURL = (await this.client.get(`${this.nineAnimeResolver}/decrypt?query=${encodeURIComponent(serverSource.result.url)}&apikey=${this.apiKey}`)).data.url;
-            if (embedURL.startsWith('http')) {
-                const response = await this.fetchEpisodeSources(embedURL, server);
-                response.embedURL = embedURL;
-                response.intro = {
-                    start: (_c = (_b = (_a = serverSource === null || serverSource === void 0 ? void 0 : serverSource.result) === null || _a === void 0 ? void 0 : _a.skip_data) === null || _b === void 0 ? void 0 : _b.intro_begin) !== null && _c !== void 0 ? _c : 0,
-                    end: (_f = (_e = (_d = serverSource === null || serverSource === void 0 ? void 0 : serverSource.result) === null || _d === void 0 ? void 0 : _d.skip_data) === null || _e === void 0 ? void 0 : _e.intro_end) !== null && _f !== void 0 ? _f : 0,
-                };
-                return response;
-            }
-            else {
-                throw new Error('Server did not respond correctly');
-            }
+            // console.log('serverSource', serverSource)
+            const embedURL = await (0, utils_2.decryptVer)(serverSource.result.url);
+            // const embedURL= await this.decrypt(serverSource.result.url);
+            // console.log('embedURL', embedURL)
+            const iSource = {
+                headers: {
+                    Referer: 'https://aniwave.to',
+                },
+                sources: [],
+                embedURL: (0, utils_2.fullyDecodeUrl)(embedURL)
+            };
+            return iSource;
+            // if (embedURL.startsWith('https')) {
+            //   const response: ISource = await this.fetchEpisodeSources(embedURL, server);
+            //   response.embedURL = embedURL;
+            //   response.intro = {
+            //     start: serverSource?.result?.skip_data?.intro_begin ?? 0,
+            //     end: serverSource?.result?.skip_data?.intro_end ?? 0,
+            //   };
+            //   return response;
+            // } else {
+            //   throw new Error('Server did not respond correctly');
+            // }
         }
         catch (err) {
             throw new Error(err.message);
@@ -273,7 +294,9 @@ class NineAnime extends models_1.AnimeParser {
     }
     async fetchEpisodeServers(episodeId) {
         if (!episodeId.startsWith(this.baseUrl))
-            episodeId = `${this.baseUrl}/ajax/server/list/${episodeId}?vrf=${encodeURIComponent(await this.ev(episodeId))}`;
+            episodeId = `${this.baseUrl}/ajax/server/list/${episodeId}?vrf=${encodeURIComponent(await (0, utils_2.vrfEncrypt)(episodeId)
+            // await this.ev(episodeId)
+            )}`;
         const { data: { result }, } = await this.client.get(episodeId);
         const $ = (0, cheerio_1.load)(result);
         const servers = [];
@@ -286,13 +309,23 @@ class NineAnime extends models_1.AnimeParser {
         });
         return servers;
     }
+    // public async ev(query: string, raw = false): Promise<string> {
+    //   const { data } = await this.client.get(
+    //     `${this.nineAnimeResolver}/vrf?query=${encodeURIComponent(query)}&apikey=${this.apiKey}`
+    //   );
+    //   if (raw) {
+    //     return data;
+    //   } else {
+    //     return data.url;
+    //   }
+    // }
     async ev(query, raw = false) {
-        const { data } = await this.client.get(`${this.nineAnimeResolver}/vrf?query=${encodeURIComponent(query)}&apikey=${this.apiKey}`);
+        const { data } = await this.client.get(`http://localhost:9090/api/vrf/v3?query=${encodeURIComponent(query)}&apikey=${this.apiKey}`);
         if (raw) {
             return data;
         }
         else {
-            return data.url;
+            return data;
         }
     }
     async searchVrf(query, raw = false) {
@@ -305,14 +338,24 @@ class NineAnime extends models_1.AnimeParser {
         }
     }
     async decrypt(query, raw = false) {
-        const { data } = await this.client.get(`${this.nineAnimeResolver}/decrypt?query=${encodeURIComponent(query)}&apikey=${this.apiKey}`);
+        const { data } = await this.client.get(`http://localhost:9090/api/decrypt/v3?query=${encodeURIComponent(query)}&apikey=${this.apiKey}`);
         if (raw) {
             return data;
         }
         else {
-            return data.url;
+            return data;
         }
     }
+    // public async decrypt(query: string, raw = false): Promise<string> {
+    //   const { data } = await this.client.get(
+    //     `${this.nineAnimeResolver}/decrypt?query=${encodeURIComponent(query)}&apikey=${this.apiKey}`
+    //   );
+    //   if (raw) {
+    //     return data;
+    //   } else {
+    //     return data.url;
+    //   }
+    // }
     async vizcloud(query) {
         const { data } = await this.client.get(`${this.nineAnimeResolver}/vizcloud?query=${encodeURIComponent(query)}&apikey=${this.apiKey}`);
         return data;

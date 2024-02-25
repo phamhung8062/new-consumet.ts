@@ -20,3 +20,6 @@ export declare const substringBefore: (str: string, toFind: string) => string;
 export declare const substringAfterLast: (str: string, toFind: string) => string;
 export declare const substringBeforeLast: (str: string, toFind: string) => string;
 export declare const getHashFromImage: (url: string) => "" | "hash";
+export declare const decryptVer: (plaintext: any) => any;
+export declare const vrfEncrypt: (input: any) => any;
+export declare const fullyDecodeUrl: (input: any) => any;

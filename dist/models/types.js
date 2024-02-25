@@ -23,6 +23,7 @@ var StreamingServers;
     StreamingServers["Mp4Upload"] = "mp4upload";
     StreamingServers["UpCloud"] = "upcloud";
     StreamingServers["VidCloud"] = "vidcloud";
+    StreamingServers["VidPlay"] = "vidplay";
     StreamingServers["StreamTape"] = "streamtape";
     StreamingServers["VizCloud"] = "vizcloud";
     // same as vizcloud

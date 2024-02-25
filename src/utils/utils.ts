@@ -3,6 +3,9 @@ import { load } from 'cheerio';
 // import * as blurhash from 'blurhash';
 import { ProxyConfig } from '../models';
 import axios, { AxiosRequestConfig } from 'axios';
+import { RC4, enc } from 'crypto-js';
+import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
+import base64url, { Base64Url } from "base64url";
 
 export const USER_AGENT =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36';
@@ -177,3 +180,73 @@ export const getHashFromImage = (url: string) => {
     return 'hash';
   }
 };
+
+export const decryptVer=(plaintext: any): any =>{
+  const vrfBuffer = Buffer.from(plaintext, 'base64url');
+  const rc4Key = Buffer.from("hlPeNwkncH0fq9so", "utf-8");
+  const decipher = createDecipheriv("rc4", rc4Key, null);
+  let decrypted = decipher.update(vrfBuffer, undefined, 'utf8');
+  decrypted += decipher.final('utf8');
+  return decrypted;
+}
+
+export const vrfEncrypt =(input: any): any => {
+  const cipher = createCipheriv("rc4", "ysJhV6U27FVIjjuk", "");
+  let vrf : any = Buffer.concat([cipher.update(input), cipher.final()]);
+  vrf = base64url.encode(vrf);
+  vrf = Buffer.from(vrf).toString("base64");
+  vrf = stringToBytes(vrf);
+  vrf = vrfShift(vrf);
+  vrf = Buffer.from(vrf).toString("base64");
+  vrf = stringToBytes(vrf);
+  vrf = rot13(vrf);
+  return bytesToString(vrf);
+}
+
+function bytesToString(bytes: any): any {
+  let str = "";
+  for (let i = 0; i < bytes.length; i++) {
+    str += String.fromCharCode(bytes[i]);
+  }
+  return str;
+}
+
+function vrfShift(vrf: any): any {
+  const shifts = [-3, 3, -4, 2, -2, 5, 4, 5];
+  for (let i = 0; i < vrf.length; i++) {
+    const shift = shifts[i % 8];
+    vrf[i] = (vrf[i] + shift) % 256;
+  }
+
+  return vrf;
+}
+
+function stringToBytes(str: any): any {
+  const bytes = [];
+  for (let i = 0; i < str.length; i++) {
+    bytes.push(str.charCodeAt(i));
+  }
+  return bytes;
+}
+
+function rot13(vrf: any): any {
+  for (let i = 0; i < vrf.length; i++) {
+    let byte = vrf[i];
+    if (byte >= 65 && byte <= 90) {
+      vrf[i] = ((byte - 65 + 13) % 26) + 65;
+    } else if (byte >= 97 && byte <= 122) {
+      vrf[i] = ((byte - 97 + 13) % 26) + 97;
+    }
+  }
+  return vrf;
+}
+export const fullyDecodeUrl =(input: any): any => {
+  let decodedUrl = input;
+  let prevUrl = null;
+  // Lặp cho đến khi URL không thay đổi sau quá trình giải mã
+  while (decodedUrl !== prevUrl) {
+    prevUrl = decodedUrl;
+    decodedUrl = decodeURIComponent(decodedUrl);
+  }
+  return decodedUrl;
+}

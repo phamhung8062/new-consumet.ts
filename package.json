@@ -52,8 +52,10 @@
     "dependencies": {
         "ascii-url-encoder": "^1.2.0",
         "axios": "^0.27.2",
+        "base64url": "^3.0.1",
         "cheerio": "1.0.0-rc.12",
-        "crypto-js": "^4.1.1",
+        "crypto": "^1.0.1",
+        "crypto-js": "^4.2.0",
         "form-data": "^4.0.0"
     },
     "devDependencies": {
@@ -61,7 +63,7 @@
         "@commitlint/config-angular": "^17.6.3",
         "@types/crypto-js": "^4.1.1",
         "@types/jest": "^29.5.1",
-        "@types/node": "^20.2.1",
+        "@types/node": "^20.11.20",
         "@types/ws": "^8.5.4",
         "auto-changelog": "^2.4.0",
         "cloudscraper": "^4.6.0",

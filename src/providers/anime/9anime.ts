@@ -17,6 +17,7 @@ import {
 } from '../../models';
 import { StreamTape, VizCloud, Filemoon } from '../../extractors';
 import { USER_AGENT, range } from '../../utils';
+import { decryptVer, fullyDecodeUrl, vrfEncrypt } from '../../utils/utils';
 
 /**
  * **Use at your own risk :)** 9anime devs keep changing the keys every week
@@ -213,13 +214,13 @@ class NineAnime extends AnimeParser {
 
       const id = $('#watch-main').attr('data-id')!;
 
+      const vrf = await vrfEncrypt(id);
       // const vrf = await this.ev(id);
-      // const {
-      //   data: { result },
-      // } = await this.client.get(`${this.baseUrl}/ajax/episode/list/${id}?vrf=${encodeURIComponent(vrf)}`);
+      // console.log('firsvrft', vrf)
       const {
         data: { result },
-      } = await this.client.get(`${this.baseUrl}/ajax/episode/list/${id}`);
+      } = await this.client.get(`${this.baseUrl}/ajax/episode/list/${id}?vrf=${encodeURIComponent(vrf)}`);
+      // console.log('episode/list', `${this.baseUrl}/ajax/episode/list/${id}?vrf=${encodeURIComponent(vrf)}`)
       const $$ = load(result);
       animeInfo.totalEpisodes = $$('div.episodes > ul > li > a').length;
       animeInfo.episodes = [];
@@ -254,9 +255,9 @@ class NineAnime extends AnimeParser {
 
   override async fetchEpisodeSources(
     episodeId: string,
-    server: StreamingServers = StreamingServers.VizCloud
+    server: StreamingServers = StreamingServers.VidPlay
   ): Promise<ISource> {
-    if (episodeId.startsWith('http')) {
+    if (episodeId.startsWith('https')) {
       const serverUrl = new URL(episodeId);
       switch (server) {
         case StreamingServers.StreamTape:
@@ -266,6 +267,7 @@ class NineAnime extends AnimeParser {
           };
         case StreamingServers.VizCloud:
         case StreamingServers.VidCloud:
+        case StreamingServers.VidPlay:
           return {
             headers: { Referer: serverUrl.href, 'User-Agent': USER_AGENT },
             sources: await new VizCloud().extract(serverUrl, this.nineAnimeResolver, this.apiKey),
@@ -286,10 +288,13 @@ class NineAnime extends AnimeParser {
     }
     try {
       const servers = await this.fetchEpisodeServers(episodeId);
+      // console.log('servers', servers)
       let s = servers.find(s => s.name === server);
+      // console.log('server', server)
+      // console.log('first', s)
       switch (server) {
-        case StreamingServers.VizCloud:
-          s = servers.find(s => s.name === 'vidstream')!;
+        case StreamingServers.VidPlay:
+          s = servers.find(s => s.name === 'vidplay')!;
           if (!s) throw new Error('Vidstream server found');
           break;
         case StreamingServers.StreamTape:
@@ -304,38 +309,42 @@ class NineAnime extends AnimeParser {
           s = servers.find(s => s.name === 'filemoon');
           if (!s) throw new Error('Filemoon server found');
           break;
+           case StreamingServers.Filemoon:
+          s = servers.find(s => s.name === 'filemoon');
+          if (!s) throw new Error('Filemoon server found');
+          break;
         default:
-          throw new Error('Server not found');
+          throw new Error('Server not found1');
       }
-
-      const serverVrf = (
-        await this.client.get(
-          `${this.nineAnimeResolver}/vrf?query=${encodeURIComponent(s.url)}&apikey=${this.apiKey}`
-        )
-      ).data.url;
+      // const serverVrf = await this.ev(s.url);
+      const serverVrf = await vrfEncrypt(s.url);
+      // console.log('serverVrf', serverVrf)
       const serverSource = (
         await this.client.get(`${this.baseUrl}/ajax/server/${s.url}?vrf=${encodeURIComponent(serverVrf)}`)
       ).data;
-      const embedURL = (
-        await this.client.get(
-          `${this.nineAnimeResolver}/decrypt?query=${encodeURIComponent(serverSource.result.url)}&apikey=${
-            this.apiKey
-          }`
-        )
-      ).data.url;
-
-      if (embedURL.startsWith('http')) {
-        const response: ISource = await this.fetchEpisodeSources(embedURL, server);
-        response.embedURL = embedURL;
-        response.intro = {
-          start: serverSource?.result?.skip_data?.intro_begin ?? 0,
-          end: serverSource?.result?.skip_data?.intro_end ?? 0,
-        };
-
-        return response;
-      } else {
-        throw new Error('Server did not respond correctly');
-      }
+      // console.log('serverSource', serverSource)
+      const embedURL= await decryptVer(serverSource.result.url);
+      // const embedURL= await this.decrypt(serverSource.result.url);
+      // console.log('embedURL', embedURL)
+      const iSource: ISource = {
+        headers: {
+          Referer: 'https://aniwave.to',
+        },
+        sources: [],
+        embedURL: fullyDecodeUrl(embedURL) 
+      };
+        return iSource;
+      // if (embedURL.startsWith('https')) {
+      //   const response: ISource = await this.fetchEpisodeSources(embedURL, server);
+      //   response.embedURL = embedURL;
+      //   response.intro = {
+      //     start: serverSource?.result?.skip_data?.intro_begin ?? 0,
+      //     end: serverSource?.result?.skip_data?.intro_end ?? 0,
+      //   };
+      //   return response;
+      // } else {
+      //   throw new Error('Server did not respond correctly');
+      // }
     } catch (err) {
       throw new Error((err as Error).message);
     }
@@ -344,7 +353,8 @@ class NineAnime extends AnimeParser {
   override async fetchEpisodeServers(episodeId: string): Promise<IEpisodeServer[]> {
     if (!episodeId.startsWith(this.baseUrl))
       episodeId = `${this.baseUrl}/ajax/server/list/${episodeId}?vrf=${encodeURIComponent(
-        await this.ev(episodeId)
+        await vrfEncrypt(episodeId)
+        // await this.ev(episodeId)
       )}`;
 
     const {
@@ -365,15 +375,27 @@ class NineAnime extends AnimeParser {
     return servers;
   }
 
+  // public async ev(query: string, raw = false): Promise<string> {
+  //   const { data } = await this.client.get(
+  //     `${this.nineAnimeResolver}/vrf?query=${encodeURIComponent(query)}&apikey=${this.apiKey}`
+  //   );
+
+  //   if (raw) {
+  //     return data;
+  //   } else {
+  //     return data.url;
+  //   }
+  // }
+
   public async ev(query: string, raw = false): Promise<string> {
     const { data } = await this.client.get(
-      `${this.nineAnimeResolver}/vrf?query=${encodeURIComponent(query)}&apikey=${this.apiKey}`
+      `http://localhost:9090/api/vrf/v3?query=${encodeURIComponent(query)}&apikey=${this.apiKey}`
     );
 
     if (raw) {
       return data;
     } else {
-      return data.url;
+      return data;
     }
   }
 
@@ -391,15 +413,27 @@ class NineAnime extends AnimeParser {
 
   public async decrypt(query: string, raw = false): Promise<string> {
     const { data } = await this.client.get(
-      `${this.nineAnimeResolver}/decrypt?query=${encodeURIComponent(query)}&apikey=${this.apiKey}`
+      `http://localhost:9090/api/decrypt/v3?query=${encodeURIComponent(query)}&apikey=${this.apiKey}`
     );
 
     if (raw) {
       return data;
     } else {
-      return data.url;
+      return data;
     }
   }
+
+  // public async decrypt(query: string, raw = false): Promise<string> {
+  //   const { data } = await this.client.get(
+  //     `${this.nineAnimeResolver}/decrypt?query=${encodeURIComponent(query)}&apikey=${this.apiKey}`
+  //   );
+
+  //   if (raw) {
+  //     return data;
+  //   } else {
+  //     return data.url;
+  //   }
+  // }
 
   public async vizcloud(query: string): Promise<string> {
     const { data } = await this.client.get(

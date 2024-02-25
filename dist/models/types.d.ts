@@ -157,6 +157,7 @@ export declare enum StreamingServers {
     Mp4Upload = "mp4upload",
     UpCloud = "upcloud",
     VidCloud = "vidcloud",
+    VidPlay = "vidplay",
     StreamTape = "streamtape",
     VizCloud = "vizcloud",
     MyCloud = "mycloud",

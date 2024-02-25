@@ -1,8 +1,13 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getHashFromImage = exports.substringBeforeLast = exports.substringAfterLast = exports.substringBefore = exports.substringAfter = exports.compareTwoStrings = exports.convertDuration = exports.isJson = exports.getDays = exports.capitalizeFirstLetter = exports.range = exports.genElement = exports.formatTitle = exports.floorID = exports.splitAuthor = exports.days = exports.USER_AGENT = void 0;
+exports.fullyDecodeUrl = exports.vrfEncrypt = exports.decryptVer = exports.getHashFromImage = exports.substringBeforeLast = exports.substringAfterLast = exports.substringBefore = exports.substringAfter = exports.compareTwoStrings = exports.convertDuration = exports.isJson = exports.getDays = exports.capitalizeFirstLetter = exports.range = exports.genElement = exports.formatTitle = exports.floorID = exports.splitAuthor = exports.days = exports.USER_AGENT = void 0;
 // import sharp from 'sharp';
 const cheerio_1 = require("cheerio");
+const crypto_1 = require("crypto");
+const base64url_1 = __importDefault(require("base64url"));
 exports.USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36';
 exports.days = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 const splitAuthor = (authors) => {
@@ -167,4 +172,71 @@ const getHashFromImage = (url) => {
     }
 };
 exports.getHashFromImage = getHashFromImage;
+const decryptVer = (plaintext) => {
+    const vrfBuffer = Buffer.from(plaintext, 'base64url');
+    const rc4Key = Buffer.from("hlPeNwkncH0fq9so", "utf-8");
+    const decipher = (0, crypto_1.createDecipheriv)("rc4", rc4Key, null);
+    let decrypted = decipher.update(vrfBuffer, undefined, 'utf8');
+    decrypted += decipher.final('utf8');
+    return decrypted;
+};
+exports.decryptVer = decryptVer;
+const vrfEncrypt = (input) => {
+    const cipher = (0, crypto_1.createCipheriv)("rc4", "ysJhV6U27FVIjjuk", "");
+    let vrf = Buffer.concat([cipher.update(input), cipher.final()]);
+    vrf = base64url_1.default.encode(vrf);
+    vrf = Buffer.from(vrf).toString("base64");
+    vrf = stringToBytes(vrf);
+    vrf = vrfShift(vrf);
+    vrf = Buffer.from(vrf).toString("base64");
+    vrf = stringToBytes(vrf);
+    vrf = rot13(vrf);
+    return bytesToString(vrf);
+};
+exports.vrfEncrypt = vrfEncrypt;
+function bytesToString(bytes) {
+    let str = "";
+    for (let i = 0; i < bytes.length; i++) {
+        str += String.fromCharCode(bytes[i]);
+    }
+    return str;
+}
+function vrfShift(vrf) {
+    const shifts = [-3, 3, -4, 2, -2, 5, 4, 5];
+    for (let i = 0; i < vrf.length; i++) {
+        const shift = shifts[i % 8];
+        vrf[i] = (vrf[i] + shift) % 256;
+    }
+    return vrf;
+}
+function stringToBytes(str) {
+    const bytes = [];
+    for (let i = 0; i < str.length; i++) {
+        bytes.push(str.charCodeAt(i));
+    }
+    return bytes;
+}
+function rot13(vrf) {
+    for (let i = 0; i < vrf.length; i++) {
+        let byte = vrf[i];
+        if (byte >= 65 && byte <= 90) {
+            vrf[i] = ((byte - 65 + 13) % 26) + 65;
+        }
+        else if (byte >= 97 && byte <= 122) {
+            vrf[i] = ((byte - 97 + 13) % 26) + 97;
+        }
+    }
+    return vrf;
+}
+const fullyDecodeUrl = (input) => {
+    let decodedUrl = input;
+    let prevUrl = null;
+    // Lặp cho đến khi URL không thay đổi sau quá trình giải mã
+    while (decodedUrl !== prevUrl) {
+        prevUrl = decodedUrl;
+        decodedUrl = decodeURIComponent(decodedUrl);
+    }
+    return decodedUrl;
+};
+exports.fullyDecodeUrl = fullyDecodeUrl;
 //# sourceMappingURL=utils.js.map
