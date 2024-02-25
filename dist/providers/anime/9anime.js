@@ -306,7 +306,7 @@ class NineAnime extends models_1.AnimeParser {
             // const {
             //   data: { result },
             // } = await this.client.get(episodeId);
-            const episodeServer = await await axiosConfig_1.default.get(episodeId);
+            const episodeServer = await axiosConfig_1.default.get(episodeId);
             console.log('episodeServer', episodeServer);
             const { data: { result }, } = await axiosConfig_1.default.get(episodeId);
             console.log('episodeId-data', result);
