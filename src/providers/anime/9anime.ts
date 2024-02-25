@@ -1,5 +1,6 @@
 import { load } from 'cheerio';
 import { AxiosAdapter } from 'axios';
+import axiosInstance from '../../utils/axiosConfig';
 
 import {
   AnimeParser,
@@ -357,13 +358,15 @@ class NineAnime extends AnimeParser {
         await vrfEncrypt(episodeId)
         // await this.ev(episodeId)
       )}`;
-      console.log('episodeId', episodeId)
+    console.log('episodeId', episodeId)
+    // const {
+    //   data: { result },
+    // } = await this.client.get(episodeId);
     const {
       data: { result },
-    } = await this.client.get(episodeId);
-console.log('episodeId-data', result)
+    } = await axiosInstance.get(episodeId);
+    console.log('episodeId-data', result)
     const $ = load(result);
-
     const servers: IEpisodeServer[] = [];
     $('.type > ul > li').each((i, el) => {
       const serverId = $(el).attr('data-link-id')!;
@@ -374,6 +377,7 @@ console.log('episodeId-data', result)
     });
     return servers;
     }catch (err) {
+      console.log('fetchEpisodeServers', err)
       throw new Error((err as Error).message);
     }
   }

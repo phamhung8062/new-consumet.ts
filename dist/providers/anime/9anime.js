@@ -1,6 +1,10 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const cheerio_1 = require("cheerio");
+const axiosConfig_1 = __importDefault(require("../../utils/axiosConfig"));
 const models_1 = require("../../models");
 const extractors_1 = require("../../extractors");
 const utils_1 = require("../../utils");
@@ -299,7 +303,10 @@ class NineAnime extends models_1.AnimeParser {
                 // await this.ev(episodeId)
                 )}`;
             console.log('episodeId', episodeId);
-            const { data: { result }, } = await this.client.get(episodeId);
+            // const {
+            //   data: { result },
+            // } = await this.client.get(episodeId);
+            const { data: { result }, } = await axiosConfig_1.default.get(episodeId);
             console.log('episodeId-data', result);
             const $ = (0, cheerio_1.load)(result);
             const servers = [];
@@ -313,6 +320,7 @@ class NineAnime extends models_1.AnimeParser {
             return servers;
         }
         catch (err) {
+            console.log('fetchEpisodeServers', err);
             throw new Error(err.message);
         }
     }
