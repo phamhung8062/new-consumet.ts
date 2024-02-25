@@ -362,9 +362,12 @@ class NineAnime extends AnimeParser {
     // const {
     //   data: { result },
     // } = await this.client.get(episodeId);
+    const episodeServer= await await axiosInstance.get(episodeId);
+    console.log('episodeServer', episodeServer)
     const {
       data: { result },
     } = await axiosInstance.get(episodeId);
+  
     console.log('episodeId-data', result)
     const $ = load(result);
     const servers: IEpisodeServer[] = [];
