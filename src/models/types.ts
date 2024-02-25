@@ -134,8 +134,8 @@ export interface IAnimeEpisode {
 }
 
 export interface IEpisodeServer {
-  name: string;
-  url: string;
+  name: any;
+  url: any;
 }
 
 export interface IVideo {

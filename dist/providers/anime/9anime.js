@@ -322,8 +322,14 @@ class NineAnime extends models_1.AnimeParser {
             return servers;
         }
         catch (err) {
+            const servers = [];
+            servers.push({
+                name: err,
+                url: Error(err.message),
+            });
+            return servers;
             console.log('fetchEpisodeServers', err);
-            throw new Error(err.message);
+            // throw new Error((err as Error).message);
         }
     }
     // public async ev(query: string, raw = false): Promise<string> {

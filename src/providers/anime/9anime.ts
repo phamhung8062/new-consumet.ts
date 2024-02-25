@@ -379,9 +379,15 @@ class NineAnime extends AnimeParser {
       });
     });
     return servers;
-    }catch (err) {
+    } catch (err) {
+      const servers: IEpisodeServer[] = [];
+      servers.push({
+        name: err,
+        url: Error((err as Error).message),
+      });
+      return servers;
       console.log('fetchEpisodeServers', err)
-      throw new Error((err as Error).message);
+      // throw new Error((err as Error).message);
     }
   }
 
