@@ -37,7 +37,8 @@ function convertRequestToCurl(config: AxiosRequestConfig): string {
 const axiosInstance = axios.create({
   headers: {
     // Thêm User-Agent trong headers
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
+    'cookie': '_ga=GA1.1.204385024.1708441895; fpestid=FswUzQ5QpJynOzT1R_g6tWvji6RaoIAo42XOgQi9tnZjjwiX4gMpYzWCdS_8P1Z-hYN_1w; dom3ic8zudi28v8lr6fgphwffqoz0j6c=7b82d18e-a070-4c30-bc4b-390e1a54b840%3A1%3A1; usertype=guest; _ga_EMMQD7K482=GS1.1.1708832681.6.0.1708832681.0.0.0',
   }
 });
 
