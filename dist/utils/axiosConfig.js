@@ -35,7 +35,12 @@ function convertRequestToCurl(config) {
     return curl;
 }
 // Tạo và cấu hình Axios instance
-const axiosInstance = axios_1.default.create({});
+const axiosInstance = axios_1.default.create({
+    headers: {
+        // Thêm User-Agent trong headers
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+    }
+});
 // Thêm request interceptor để log CURL command
 axiosInstance.interceptors.request.use((config) => {
     console.log(convertRequestToCurl(config));
