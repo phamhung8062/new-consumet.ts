@@ -48,4 +48,9 @@ axiosInstance.interceptors.request.use((config) => {
   return config;
 });
 
+axiosInstance.interceptors.response.use(response => {
+  console.log('Response:', JSON.stringify(response.data, null, 2));
+  return response;
+});
+
 export default axiosInstance;
