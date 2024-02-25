@@ -320,7 +320,7 @@ class NineAnime extends models_1.AnimeParser {
             return servers;
         }
         catch (err) {
-            console.log('fetchEpisodeServers', err);
+            // console.log('fetchEpisodeServers', err)
             throw new Error(err.message);
         }
     }
