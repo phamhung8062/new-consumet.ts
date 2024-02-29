@@ -389,11 +389,12 @@ class NineAnime extends AnimeParser {
     // const episodeServer= await axiosInstance.get(episodeId);
     const episodeServer= await axiosInstance.get(`https://api.zenrows.com/v1/?apikey=62e50124f8f5874eea30a19d2d93d73b81c09b3f&url=${encodeURIComponent(episodeId)}`);
     console.log('episodeServer', episodeServer)
+    // const {
+    //   data: { result },
+    // } = await axiosInstance.get(episodeId);
     const {
       data: { result },
-    } = await axiosInstance.get(episodeId);
-  
-    console.log('episodeId-data', result)
+    } = episodeServer;
     const $ = load(result);
     const servers: IEpisodeServer[] = [];
     $('.type > ul > li').each((i, el) => {
@@ -405,14 +406,7 @@ class NineAnime extends AnimeParser {
     });
     return servers;
     } catch (err) {
-      const servers: IEpisodeServer[] = [];
-      servers.push({
-        name: err,
-        url: Error((err as Error).message),
-      });
-      return servers;
-      console.log('fetchEpisodeServers', err)
-      // throw new Error((err as Error).message);
+      throw new Error((err as Error).message);
     }
   }
 
