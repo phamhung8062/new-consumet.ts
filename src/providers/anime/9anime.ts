@@ -1,7 +1,7 @@
 import { load } from 'cheerio';
 import { AxiosAdapter } from 'axios';
 import axiosInstance from '../../utils/axiosConfig';
-import puppeteer from 'puppeteer';
+// import puppeteer from 'puppeteer';
 
 import {
   AnimeParser,
@@ -87,7 +87,7 @@ class NineAnime extends AnimeParser {
 
       // https://api.zenrows.com/v1/?apikey=62e50124f8f5874eea30a19d2d93d73b81c09b3f&url=https://aniwave.to/filter?keyword=one+pice
       
-      const res1 = await this.fetchPage(query, 1);
+      // const res1 = await this.fetchPage(query, 1);
       const $ = load(res.data);
       searchResult.hasNextPage =
         $(`ul.pagination`).length > 0
@@ -464,16 +464,16 @@ class NineAnime extends AnimeParser {
     }
   }
 
- public async fetchPage(query : string, page1: number) : Promise<string>{
-    const url = `${this.baseUrl}/filter?keyword=${encodeURIComponent(query).replace(/%20/g, '+')}&page=${page1}`;
-    console.log('url', url);
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
-    await page.goto(url);
-    const content = await page.content();
-    await browser.close();
-    return content; 
-  }
+//  public async fetchPage(query : string, page1: number) : Promise<string>{
+//     const url = `${this.baseUrl}/filter?keyword=${encodeURIComponent(query).replace(/%20/g, '+')}&page=${page1}`;
+//     console.log('url', url);
+//     const browser = await puppeteer.launch();
+//     const page = await browser.newPage();
+//     await page.goto(url);
+//     const content = await page.content();
+//     await browser.close();
+//     return content; 
+//   }
 
 
 

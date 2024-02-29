@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const cheerio_1 = require("cheerio");
 const axiosConfig_1 = __importDefault(require("../../utils/axiosConfig"));
-const puppeteer_1 = __importDefault(require("puppeteer"));
+// import puppeteer from 'puppeteer';
 const models_1 = require("../../models");
 const extractors_1 = require("../../extractors");
 const utils_1 = require("../../utils");
@@ -56,7 +56,7 @@ class NineAnime extends models_1.AnimeParser {
             const url = `${this.baseUrl}/filter?keyword=${encodeURIComponent(query).replace(/%20/g, '+')}&page=${page}`;
             const res = await this.client.get(`https://api.zenrows.com/v1/?apikey=62e50124f8f5874eea30a19d2d93d73b81c09b3f&url=${encodeURIComponent(url)}`);
             // https://api.zenrows.com/v1/?apikey=62e50124f8f5874eea30a19d2d93d73b81c09b3f&url=https://aniwave.to/filter?keyword=one+pice
-            const res1 = await this.fetchPage(query, 1);
+            // const res1 = await this.fetchPage(query, 1);
             const $ = (0, cheerio_1.load)(res.data);
             searchResult.hasNextPage =
                 $(`ul.pagination`).length > 0
@@ -392,16 +392,16 @@ class NineAnime extends models_1.AnimeParser {
             return data;
         }
     }
-    async fetchPage(query, page1) {
-        const url = `${this.baseUrl}/filter?keyword=${encodeURIComponent(query).replace(/%20/g, '+')}&page=${page1}`;
-        console.log('url', url);
-        const browser = await puppeteer_1.default.launch();
-        const page = await browser.newPage();
-        await page.goto(url);
-        const content = await page.content();
-        await browser.close();
-        return content;
-    }
+    //  public async fetchPage(query : string, page1: number) : Promise<string>{
+    //     const url = `${this.baseUrl}/filter?keyword=${encodeURIComponent(query).replace(/%20/g, '+')}&page=${page1}`;
+    //     console.log('url', url);
+    //     const browser = await puppeteer.launch();
+    //     const page = await browser.newPage();
+    //     await page.goto(url);
+    //     const content = await page.content();
+    //     await browser.close();
+    //     return content; 
+    //   }
     // public async decrypt(query: string, raw = false): Promise<string> {
     //   const { data } = await this.client.get(
     //     `${this.nineAnimeResolver}/decrypt?query=${encodeURIComponent(query)}&apikey=${this.apiKey}`
