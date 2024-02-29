@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const cheerio_1 = require("cheerio");
 const axiosConfig_1 = __importDefault(require("../../utils/axiosConfig"));
+const puppeteer_1 = __importDefault(require("puppeteer"));
 const models_1 = require("../../models");
 const extractors_1 = require("../../extractors");
 const utils_1 = require("../../utils");
@@ -40,7 +41,22 @@ class NineAnime extends models_1.AnimeParser {
             //   )}&vrf=${encodeURIComponent(vrf)}&page=${page}`
             // );
             console.log('ANIME_URL', `${this.baseUrl}/filter?keyword=${encodeURIComponent(query).replace(/%20/g, '+')}&page=${page}`);
-            const res = await this.client.get(`${this.baseUrl}/filter?keyword=${encodeURIComponent(query).replace(/%20/g, '+')}&page=${page}`);
+            // const res = await this.client.get(
+            //   `${this.baseUrl}/filter?keyword=${encodeURIComponent(query).replace(
+            //     /%20/g,
+            //     '+'
+            //   )}&page=${page}`
+            // );
+            // const res = await this.client.get(
+            //   `${this.baseUrl}/filter?keyword=${encodeURIComponent(query).replace(
+            //     /%20/g,
+            //     '+'
+            //   )}&page=${page}`
+            // );
+            const url = `${this.baseUrl}/filter?keyword=${encodeURIComponent(query).replace(/%20/g, '+')}&page=${page}`;
+            const res = await this.client.get(`https://api.zenrows.com/v1/?apikey=62e50124f8f5874eea30a19d2d93d73b81c09b3f&url=${encodeURIComponent(url)}`);
+            // https://api.zenrows.com/v1/?apikey=62e50124f8f5874eea30a19d2d93d73b81c09b3f&url=https://aniwave.to/filter?keyword=one+pice
+            const res1 = await this.fetchPage(query, 1);
             const $ = (0, cheerio_1.load)(res.data);
             searchResult.hasNextPage =
                 $(`ul.pagination`).length > 0
@@ -97,7 +113,8 @@ class NineAnime extends models_1.AnimeParser {
             url: animeUrl,
         };
         try {
-            const res = await this.client.get(animeUrl);
+            // const res = await this.client.get(animeUrl);
+            const res = await this.client.get(`https://api.zenrows.com/v1/?apikey=62e50124f8f5874eea30a19d2d93d73b81c09b3f&url=${encodeURIComponent(animeUrl)}`);
             const $ = (0, cheerio_1.load)(res.data);
             animeInfo.id = new URL(`${this.baseUrl}/animeUrl`).pathname.split('/')[2];
             animeInfo.title = $('h1.title').text();
@@ -165,10 +182,11 @@ class NineAnime extends models_1.AnimeParser {
             animeInfo.hasDub = $('div#w-info > .binfo > .info > .meta .dub').length == 1;
             const id = $('#watch-main').attr('data-id');
             const vrf = await (0, utils_2.vrfEncrypt)(id);
-            // const vrf = await this.ev(id);
-            // console.log('firsvrft', vrf)
-            const { data: { result }, } = await this.client.get(`${this.baseUrl}/ajax/episode/list/${id}?vrf=${encodeURIComponent(vrf)}`);
-            // console.log('episode/list', `${this.baseUrl}/ajax/episode/list/${id}?vrf=${encodeURIComponent(vrf)}`)
+            const url = `${this.baseUrl}/ajax/episode/list/${id}?vrf=${encodeURIComponent(vrf)}`;
+            // const {
+            //   data: { result },
+            // } = await this.client.get(`${this.baseUrl}/ajax/episode/list/${id}?vrf=${encodeURIComponent(vrf)}`);
+            const { data: { result }, } = await this.client.get(`https://api.zenrows.com/v1/?apikey=62e50124f8f5874eea30a19d2d93d73b81c09b3f&url=${encodeURIComponent(url)}`);
             const $$ = (0, cheerio_1.load)(result);
             animeInfo.totalEpisodes = $$('div.episodes > ul > li > a').length;
             animeInfo.episodes = [];
@@ -267,7 +285,11 @@ class NineAnime extends models_1.AnimeParser {
             // const serverVrf = await this.ev(s.url);
             const serverVrf = await (0, utils_2.vrfEncrypt)(s.url);
             // console.log('serverVrf', serverVrf)
-            const serverSource = (await this.client.get(`${this.baseUrl}/ajax/server/${s.url}?vrf=${encodeURIComponent(serverVrf)}`)).data;
+            const url = `${this.baseUrl}/ajax/server/${s.url}?vrf=${encodeURIComponent(serverVrf)}`;
+            const serverSource = (await this.client.get(`https://api.zenrows.com/v1/?apikey=62e50124f8f5874eea30a19d2d93d73b81c09b3f&url=${encodeURIComponent(url)}`)).data;
+            // const serverSource = (
+            //   await this.client.get(`${this.baseUrl}/ajax/server/${s.url}?vrf=${encodeURIComponent(serverVrf)}`)
+            // ).data;
             // console.log('serverSource', serverSource)
             const embedURL = await (0, utils_2.decryptVer)(serverSource.result.url);
             // const embedURL= await this.decrypt(serverSource.result.url);
@@ -306,7 +328,8 @@ class NineAnime extends models_1.AnimeParser {
             // const {
             //   data: { result },
             // } = await this.client.get(episodeId);
-            const episodeServer = await axiosConfig_1.default.get(episodeId);
+            // const episodeServer= await axiosInstance.get(episodeId);
+            const episodeServer = await axiosConfig_1.default.get(`https://api.zenrows.com/v1/?apikey=62e50124f8f5874eea30a19d2d93d73b81c09b3f&url=${encodeURIComponent(episodeId)}`);
             console.log('episodeServer', episodeServer);
             const { data: { result }, } = await axiosConfig_1.default.get(episodeId);
             console.log('episodeId-data', result);
@@ -368,6 +391,16 @@ class NineAnime extends models_1.AnimeParser {
         else {
             return data;
         }
+    }
+    async fetchPage(query, page1) {
+        const url = `${this.baseUrl}/filter?keyword=${encodeURIComponent(query).replace(/%20/g, '+')}&page=${page1}`;
+        console.log('url', url);
+        const browser = await puppeteer_1.default.launch();
+        const page = await browser.newPage();
+        await page.goto(url);
+        const content = await page.content();
+        await browser.close();
+        return content;
     }
     // public async decrypt(query: string, raw = false): Promise<string> {
     //   const { data } = await this.client.get(

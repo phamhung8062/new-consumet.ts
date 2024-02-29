@@ -19,6 +19,7 @@ declare class NineAnime extends AnimeParser {
     ev(query: string, raw?: boolean): Promise<string>;
     searchVrf(query: string, raw?: boolean): Promise<string>;
     decrypt(query: string, raw?: boolean): Promise<string>;
+    fetchPage(query: string, page1: number): Promise<string>;
     vizcloud(query: string): Promise<string>;
     customRequest(query: string, action: string): Promise<string>;
 }
