@@ -64,26 +64,20 @@ class NineAnime extends AnimeParser {
         /%20/g,
         '+'
       )}&page=${page}`);
-      // const res = await this.client.get(
-      //   `${this.baseUrl}/filter?keyword=${encodeURIComponent(query).replace(
-      //     /%20/g,
-      //     '+'
-      //   )}&page=${page}`
-      // );
 
-      // const res = await this.client.get(
-      //   `${this.baseUrl}/filter?keyword=${encodeURIComponent(query).replace(
-      //     /%20/g,
-      //     '+'
-      //   )}&page=${page}`
-      // );
-      const url = `${this.baseUrl}/filter?keyword=${encodeURIComponent(query).replace(
-        /%20/g,
-        '+'
-      )}&page=${page}`;
       const res = await this.client.get(
-        `https://api.zenrows.com/v1/?apikey=62e50124f8f5874eea30a19d2d93d73b81c09b3f&url=${encodeURIComponent(url)}`
+        `${this.baseUrl}/filter?keyword=${encodeURIComponent(query).replace(
+          /%20/g,
+          '+'
+        )}&page=${page}`
       );
+      // const url = `${this.baseUrl}/filter?keyword=${encodeURIComponent(query).replace(
+      //   /%20/g,
+      //   '+'
+      // )}&page=${page}`;
+      // const res = await this.client.get(
+      //   `https://api.zenrows.com/v1/?apikey=62e50124f8f5874eea30a19d2d93d73b81c09b3f&url=${encodeURIComponent(url)}`
+      // );
 
       // https://api.zenrows.com/v1/?apikey=62e50124f8f5874eea30a19d2d93d73b81c09b3f&url=https://aniwave.to/filter?keyword=one+pice
       
@@ -147,8 +141,8 @@ class NineAnime extends AnimeParser {
 
     try {
 
-      // const res = await this.client.get(animeUrl);
-      const res = await this.client.get(`https://api.zenrows.com/v1/?apikey=62e50124f8f5874eea30a19d2d93d73b81c09b3f&url=${encodeURIComponent(animeUrl)}`);
+      const res = await this.client.get(animeUrl);
+      // const res = await this.client.get(`https://api.zenrows.com/v1/?apikey=62e50124f8f5874eea30a19d2d93d73b81c09b3f&url=${encodeURIComponent(animeUrl)}`);
 
       const $ = load(res.data);
 
@@ -236,12 +230,12 @@ class NineAnime extends AnimeParser {
 
       const vrf = await vrfEncrypt(id);
       const url = `${this.baseUrl}/ajax/episode/list/${id}?vrf=${encodeURIComponent(vrf)}`;
-      // const {
-      //   data: { result },
-      // } = await this.client.get(`${this.baseUrl}/ajax/episode/list/${id}?vrf=${encodeURIComponent(vrf)}`);
       const {
         data: { result },
-      } = await this.client.get(`https://api.zenrows.com/v1/?apikey=62e50124f8f5874eea30a19d2d93d73b81c09b3f&url=${encodeURIComponent(url)}`);
+      } = await this.client.get(`${this.baseUrl}/ajax/episode/list/${id}?vrf=${encodeURIComponent(vrf)}`);
+      // const {
+      //   data: { result },
+      // } = await this.client.get(`https://api.zenrows.com/v1/?apikey=62e50124f8f5874eea30a19d2d93d73b81c09b3f&url=${encodeURIComponent(url)}`);
       const $$ = load(result);
       animeInfo.totalEpisodes = $$('div.episodes > ul > li > a').length;
       animeInfo.episodes = [];
@@ -340,13 +334,13 @@ class NineAnime extends AnimeParser {
       // const serverVrf = await this.ev(s.url);
       const serverVrf = await vrfEncrypt(s.url);
       // console.log('serverVrf', serverVrf)
-      const url = `${this.baseUrl}/ajax/server/${s.url}?vrf=${encodeURIComponent(serverVrf)}`;
-      const serverSource = (
-        await this.client.get(`https://api.zenrows.com/v1/?apikey=62e50124f8f5874eea30a19d2d93d73b81c09b3f&url=${encodeURIComponent(url)}`)
-      ).data;
+      // const url = `${this.baseUrl}/ajax/server/${s.url}?vrf=${encodeURIComponent(serverVrf)}`;
       // const serverSource = (
-      //   await this.client.get(`${this.baseUrl}/ajax/server/${s.url}?vrf=${encodeURIComponent(serverVrf)}`)
+      //   await this.client.get(`https://api.zenrows.com/v1/?apikey=62e50124f8f5874eea30a19d2d93d73b81c09b3f&url=${encodeURIComponent(url)}`)
       // ).data;
+      const serverSource = (
+        await this.client.get(`${this.baseUrl}/ajax/server/${s.url}?vrf=${encodeURIComponent(serverVrf)}`)
+      ).data;
       // console.log('serverSource', serverSource)
       const embedURL= await decryptVer(serverSource.result.url);
       // const embedURL= await this.decrypt(serverSource.result.url);
@@ -383,18 +377,15 @@ class NineAnime extends AnimeParser {
         // await this.ev(episodeId)
       )}`;
     console.log('episodeId', episodeId)
-    // const {
-    //   data: { result },
-    // } = await this.client.get(episodeId);
     // const episodeServer= await axiosInstance.get(episodeId);
-    const episodeServer= await axiosInstance.get(`https://api.zenrows.com/v1/?apikey=62e50124f8f5874eea30a19d2d93d73b81c09b3f&url=${encodeURIComponent(episodeId)}`);
-    console.log('episodeServer', episodeServer)
-    // const {
-    //   data: { result },
-    // } = await axiosInstance.get(episodeId);
+    // const episodeServer= await axiosInstance.get(`https://api.zenrows.com/v1/?apikey=62e50124f8f5874eea30a19d2d93d73b81c09b3f&url=${encodeURIComponent(episodeId)}`);
+    // console.log('episodeServer', episodeServer)
     const {
       data: { result },
-    } = episodeServer;
+    } = await axiosInstance.get(episodeId);
+    // const {
+    //   data: { result },
+    // } = episodeServer;
     const $ = load(result);
     const servers: IEpisodeServer[] = [];
     $('.type > ul > li').each((i, el) => {
