@@ -57,7 +57,7 @@ import {
   MediaFormat,
   ProxyConfig,
 } from './models';
-import { vrfEncrypt } from './utils/utils';
+import { getAxiosInstance, initializeAxiosInstance } from './utils/axiosConfig';
 
 export { ANIME, BOOKS, COMICS, MANGA, LIGHT_NOVELS, MOVIES, META, NEWS };
 export { PROVIDERS_LIST };
@@ -115,12 +115,3 @@ export {
   StreamWish,
   VidMoly,
 };
-
-
-// const run = () => {
-//   const inputString = "2025";
-//   const encryptedString = vrfEncrypt(inputString);
-  
-//   console.log("Encrypted String:", encryptedString);
-// };
-// run();

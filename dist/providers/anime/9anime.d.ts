@@ -21,5 +21,6 @@ declare class NineAnime extends AnimeParser {
     decrypt(query: string, raw?: boolean): Promise<string>;
     vizcloud(query: string): Promise<string>;
     customRequest(query: string, action: string): Promise<string>;
+    callApi(url: string): Promise<any>;
 }
 export default NineAnime;

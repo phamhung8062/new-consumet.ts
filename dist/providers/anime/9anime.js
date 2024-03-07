@@ -1,15 +1,13 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const cheerio_1 = require("cheerio");
-const axiosConfig_1 = __importDefault(require("../../utils/axiosConfig"));
+// import axiosInstance from '../../utils/axiosConfig';
 // import puppeteer from 'puppeteer';
 const models_1 = require("../../models");
 const extractors_1 = require("../../extractors");
 const utils_1 = require("../../utils");
 const utils_2 = require("../../utils/utils");
+const axiosConfig_1 = require("../../utils/axiosConfig");
 /**
  * **Use at your own risk :)** 9anime devs keep changing the keys every week
  */
@@ -41,7 +39,8 @@ class NineAnime extends models_1.AnimeParser {
             //   )}&vrf=${encodeURIComponent(vrf)}&page=${page}`
             // );
             console.log('ANIME_URL', `${this.baseUrl}/filter?keyword=${encodeURIComponent(query).replace(/%20/g, '+')}&page=${page}`);
-            const res = await this.client.get(`${this.baseUrl}/filter?keyword=${encodeURIComponent(query).replace(/%20/g, '+')}&page=${page}`);
+            const res1 = await this.client.get(`${this.baseUrl}/filter?keyword=${encodeURIComponent(query).replace(/%20/g, '+')}&page=${page}`);
+            const res = await this.callApi(`${this.baseUrl}/filter?keyword=${encodeURIComponent(query).replace(/%20/g, '+')}&page=${page}`);
             // const url = `${this.baseUrl}/filter?keyword=${encodeURIComponent(query).replace(
             //   /%20/g,
             //   '+'
@@ -107,7 +106,7 @@ class NineAnime extends models_1.AnimeParser {
             url: animeUrl,
         };
         try {
-            const res = await this.client.get(animeUrl);
+            const res = await this.callApi(animeUrl);
             // const res = await this.client.get(`https://api.zenrows.com/v1/?apikey=62e50124f8f5874eea30a19d2d93d73b81c09b3f&url=${encodeURIComponent(animeUrl)}`);
             const $ = (0, cheerio_1.load)(res.data);
             animeInfo.id = new URL(`${this.baseUrl}/animeUrl`).pathname.split('/')[2];
@@ -283,7 +282,7 @@ class NineAnime extends models_1.AnimeParser {
             // const serverSource = (
             //   await this.client.get(`https://api.zenrows.com/v1/?apikey=62e50124f8f5874eea30a19d2d93d73b81c09b3f&url=${encodeURIComponent(url)}`)
             // ).data;
-            const serverSource = (await this.client.get(`${this.baseUrl}/ajax/server/${s.url}?vrf=${encodeURIComponent(serverVrf)}`)).data;
+            const serverSource = (await this.callApi(`${this.baseUrl}/ajax/server/${s.url}?vrf=${encodeURIComponent(serverVrf)}`)).data;
             // console.log('serverSource', serverSource)
             const embedURL = await (0, utils_2.decryptVer)(serverSource.result.url);
             // const embedURL= await this.decrypt(serverSource.result.url);
@@ -322,7 +321,7 @@ class NineAnime extends models_1.AnimeParser {
             // const episodeServer= await axiosInstance.get(episodeId);
             // const episodeServer= await axiosInstance.get(`https://api.zenrows.com/v1/?apikey=62e50124f8f5874eea30a19d2d93d73b81c09b3f&url=${encodeURIComponent(episodeId)}`);
             // console.log('episodeServer', episodeServer)
-            const { data: { result }, } = await axiosConfig_1.default.get(episodeId);
+            const { data: { result }, } = await this.callApi(episodeId);
             // const {
             //   data: { result },
             // } = episodeServer;
@@ -405,6 +404,11 @@ class NineAnime extends models_1.AnimeParser {
     async customRequest(query, action) {
         const { data } = await this.client.get(`${this.nineAnimeResolver}/${action}?query=${encodeURIComponent(query)}&apikey=${this.apiKey}`);
         return data;
+    }
+    async callApi(url) {
+        await (0, axiosConfig_1.initializeAxiosInstance)();
+        const axios = (0, axiosConfig_1.getAxiosInstance)();
+        return await axios.get(url);
     }
 }
 // (async () => {

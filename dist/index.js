@@ -37,10 +37,4 @@ Object.defineProperty(exports, "TvType", { enumerable: true, get: function () { 
 Object.defineProperty(exports, "Genres", { enumerable: true, get: function () { return models_1.Genres; } });
 Object.defineProperty(exports, "Topics", { enumerable: true, get: function () { return models_1.Topics; } });
 Object.defineProperty(exports, "MediaFormat", { enumerable: true, get: function () { return models_1.MediaFormat; } });
-// const run = () => {
-//   const inputString = "2025";
-//   const encryptedString = vrfEncrypt(inputString);
-//   console.log("Encrypted String:", encryptedString);
-// };
-// run();
 //# sourceMappingURL=index.js.map
