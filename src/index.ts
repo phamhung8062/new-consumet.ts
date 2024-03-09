@@ -57,7 +57,6 @@ import {
   MediaFormat,
   ProxyConfig,
 } from './models';
-import { getAxiosInstance, initializeAxiosInstance } from './utils/axiosConfig';
 
 export { ANIME, BOOKS, COMICS, MANGA, LIGHT_NOVELS, MOVIES, META, NEWS };
 export { PROVIDERS_LIST };

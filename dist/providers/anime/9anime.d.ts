@@ -1,4 +1,4 @@
-import { AxiosAdapter } from 'axios';
+import { AxiosAdapter, AxiosResponse } from 'axios';
 import { AnimeParser, ISearch, IAnimeInfo, IAnimeResult, IEpisodeServer, ISource, StreamingServers, ProxyConfig } from '../../models';
 /**
  * **Use at your own risk :)** 9anime devs keep changing the keys every week
@@ -21,6 +21,6 @@ declare class NineAnime extends AnimeParser {
     decrypt(query: string, raw?: boolean): Promise<string>;
     vizcloud(query: string): Promise<string>;
     customRequest(query: string, action: string): Promise<string>;
-    callApi(url: string): Promise<any>;
+    callApi(url: string, type: string): Promise<AxiosResponse>;
 }
 export default NineAnime;
